@@ -8,7 +8,7 @@ from utils import *
 
 class QA_Pairer():
 
-    def __init__(self, xml_path, name=None, out_folder="out", min_score=3, max_responses=3, out_format="txt", archiver=None):
+    def __init__(self, xml_path, name=None, out_folder="out", min_score=3, max_responses=3, out_format="txt", archiver=None, tags=None):
         """Makes a text dataset from StackExchange dumps"""
         self.xml_path = xml_path
         if name is None:
@@ -27,6 +27,7 @@ class QA_Pairer():
         if out_format in ["lm_dataformat", "zip"]:
             assert archiver is not None
             self.ar = archiver
+        self.tags = tags
 
     def main(self):
         """iterates through SE xmls and:
@@ -45,6 +46,13 @@ class QA_Pairer():
                 try:
                     attribs = defaultdict(lambda: None, elem.attrib)
                     if is_question(attribs):
+                        # If required tags have been supplied,
+                        # skip over each question that does not contain at least one
+                        if self.tags is not None:
+                            tags = elem.get("Tags") or ""
+                            if not any(prefix in tags for prefix in self.tags):
+                                continue
+
                         if has_answers(attribs):
                             trim_attribs(attribs, "question")
                             self.questions[attribs["Id"]] = attribs

@@ -9,7 +9,7 @@ from lm_dataformat import Archive
 import zipfile
 
 
-def download_and_process_single(name, out_format, min_score, max_responses):
+def download_and_process_single(name, out_format, min_score, max_responses, tags):
     try:
         name = name.strip().lower()
         os.makedirs("dumps", exist_ok=True)
@@ -33,7 +33,7 @@ def download_and_process_single(name, out_format, min_score, max_responses):
             archiver = zipfile.ZipFile('{}/{}.zip'.format(out_folder, name), 'a')
         else:
             archiver = None
-        qa = QA_Pairer(path_to_xml, name=name, out_format=out_format, archiver=archiver, min_score=min_score, max_responses=max_responses)
+        qa = QA_Pairer(path_to_xml, name=name, out_format=out_format, archiver=archiver, min_score=min_score, max_responses=max_responses, tags=tags)
         qa.main()
         if out_format == "lm_dataformat":
             archiver.commit(name)
@@ -65,7 +65,7 @@ def main(args):
     # init pool with as many CPUs as available
     cpu_no = cpu_count() - 1
     p = Pool(cpu_no)
-    p.starmap(download_and_process_single, zip(names, repeat(args.out_format), repeat(args.min_score), repeat(args.max_responses)))
+    p.starmap(download_and_process_single, zip(names, repeat(args.out_format), repeat(args.min_score), repeat(args.max_responses), repeat(args.tags)))
 
 
 if __name__ == "__main__":
@@ -84,7 +84,6 @@ if __name__ == "__main__":
                         type=int, default=3)
     parser.add_argument('--max_responses', help='maximum number of responses (sorted by score) to include for each question. '
                                                 'Default 3.', type=int, default=3)
+    parser.add_argument("--tags", help="post tags to filter for", nargs="*", type=str)
     args = parser.parse_args()
     main(args)
-
-

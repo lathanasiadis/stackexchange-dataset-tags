@@ -1,3 +1,6 @@
+NOTE: This fork adds the `--tags` command line option, which expects one or more tag prefixes
+Only posts that contain at least one tag matching these prefixes are dumped.
+
 # stackexchange_dataset
 A python tool for downloading & processing the [stackexchange data dumps](https://archive.org/details/stackexchange) into a text dataset for Language Models.
 
